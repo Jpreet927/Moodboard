@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("HEROKU_POSTGRES_URI")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?
+  emailVerified DateTime?
+  avatar        String?
+  createdAt     DateTime  @default(now()) @map(name: "created_at")
+  updatedAt     DateTime  @default(now()) @map(name: "updated_at")
+  role          Role      @default(FREE)
+  pins          Pin[]
+  sessions      Session[]
+}
+
+model Pin {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String
+  description String
+  image       String?  @default("")
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  status      String?
+}
+
+model Session {
+  id      String   @id @default(cuid())
+  token   String   @unique
+  userId  String
+  expires DateTime
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  FREE
+  SUBSCRIBER
+}
