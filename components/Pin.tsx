@@ -3,6 +3,7 @@ import { Card, Form, Button, Modal } from "react-bootstrap";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import { Draggable } from "react-beautiful-dnd";
 
 const updatePinMutation = gql`
     mutation updatePin(
@@ -35,7 +36,13 @@ const deletePinMutation = gql`
     }
 `;
 
-const Pin: React.FC<Pin> = ({ title, description, id, boardCategory }) => {
+const Pin: React.FC<Pin> = ({
+    title,
+    description,
+    id,
+    boardCategory,
+    index,
+}) => {
     const [updatePin, { data, loading, error }] =
         useMutation(updatePinMutation);
     const [deletePin] = useMutation(deletePinMutation);
@@ -76,9 +83,19 @@ const Pin: React.FC<Pin> = ({ title, description, id, boardCategory }) => {
 
     return (
         <div>
-            <Card className="pin-container" onClick={handleShowModal}>
-                <Card.Body>{title}</Card.Body>
-            </Card>
+            <Draggable key={id} draggableId={id} index={index}>
+                {(provided) => (
+                    <Card
+                        className="pin-container"
+                        onClick={handleShowModal}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        ref={provided.innerRef}
+                    >
+                        <Card.Body>{title}</Card.Body>
+                    </Card>
+                )}
+            </Draggable>
             <Modal show={showModal} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Update a Pin</Modal.Title>
